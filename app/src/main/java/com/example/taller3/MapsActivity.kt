@@ -44,17 +44,12 @@ class MapsActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        solicitarPermisos()
-
         Configuration.getInstance().load(applicationContext, getSharedPreferences("osm_prefs", MODE_PRIVATE))
         binding = ActivityMapsBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-
-        auth = FirebaseAuth.getInstance()
-        myRef = FirebaseDatabase.getInstance().getReference("Users")
+        verificarYSolicitarPermisos()
 
         //Crea el canal de notificaciones
         val channel = NotificationChannel(
@@ -66,6 +61,9 @@ class MapsActivity : AppCompatActivity() {
         }
         val notificationManager = getSystemService(NotificationManager::class.java)
         notificationManager.createNotificationChannel(channel)
+
+        auth = FirebaseAuth.getInstance()
+        myRef = FirebaseDatabase.getInstance().getReference("Users")
 
         //Actualizar el switch apenas inicia la actividad
         val userId = auth.currentUser!!.uid
@@ -104,6 +102,28 @@ class MapsActivity : AppCompatActivity() {
             myRef.child(auth.currentUser!!.uid)
                 .child("disponible")
                 .setValue(estado)
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        verificarYSolicitarPermisos()
+    }
+
+    private fun verificarYSolicitarPermisos() {
+        val ubicacionPermitida = ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+        if (!ubicacionPermitida) {
+            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), 1001)
+        } else {
+            configurarActualizaciones()
+        }
+
+        // Verifica permiso de notificaciones (Android 13+)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            val notificacionesPermitidas = ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
+            if (!notificacionesPermitidas) {
+                ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.POST_NOTIFICATIONS), 1002)
+            }
         }
     }
 
@@ -174,13 +194,11 @@ class MapsActivity : AppCompatActivity() {
             primeraUbicacion = false
         }
 
-        //Actualizar su latitud y longitud
-        myRef.child(auth.currentUser!!.uid)
-            .child("latitud")
-            .setValue(geoPoint.latitude)
-        myRef.child(auth.currentUser!!.uid)
-            .child("longitud")
-            .setValue(geoPoint.longitude)
+        val currentUser = auth.currentUser ?: return
+        val userId = currentUser.uid
+
+        myRef.child(userId).child("latitud").setValue(geoPoint.latitude)
+        myRef.child(userId).child("longitud").setValue(geoPoint.longitude)
     }
 
     //Metodo que lee el archivo y crea objetos de Location
@@ -220,60 +238,24 @@ class MapsActivity : AppCompatActivity() {
         map.invalidate()
     }
 
-    private fun solicitarPermisos() {
-        val permisosNecesarios = mutableListOf<String>()
-
-        // Verifica si falta el permiso de ubicación
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-            != PackageManager.PERMISSION_GRANTED) {
-            permisosNecesarios.add(Manifest.permission.ACCESS_FINE_LOCATION)
-        }
-
-        // Verifica si falta el permiso de notificaciones (solo si Android 13 o superior)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
-            ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
-            != PackageManager.PERMISSION_GRANTED) {
-            permisosNecesarios.add(Manifest.permission.POST_NOTIFICATIONS)
-        }
-
-        // Si hay permisos faltantes, pedirlos
-        if (permisosNecesarios.isNotEmpty()) {
-            ActivityCompat.requestPermissions(this, permisosNecesarios.toTypedArray(), 1000)
-        } else {
-            configurarActualizaciones()
-        }
-    }
-
-
     //Metodo que pide los permisos de notificacion y ubicacion
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-
-        if (requestCode == 1000) {
-            var permisoUbicacionConcedido = false
-
-            permissions.forEachIndexed { index, permiso ->
-                if (permiso == Manifest.permission.ACCESS_FINE_LOCATION) {
-                    if (grantResults[index] == PackageManager.PERMISSION_GRANTED) {
-                        permisoUbicacionConcedido = true
-                    } else {
-                        Toast.makeText(this, "Se necesita el permiso de ubicación para continuar", Toast.LENGTH_SHORT).show()
-                    }
-                }
-
-                if (permiso == Manifest.permission.POST_NOTIFICATIONS) {
-                    if (grantResults[index] != PackageManager.PERMISSION_GRANTED) {
-                        Toast.makeText(this, "No se podrán mostrar notificaciones", Toast.LENGTH_SHORT).show()
-                    }
+        when (requestCode) {
+            1001 -> { // Ubicación
+                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    configurarActualizaciones()
+                } else {
+                    Toast.makeText(this, "Se necesita el permiso de ubicación para continuar", Toast.LENGTH_SHORT).show()
                 }
             }
-
-            if (permisoUbicacionConcedido) {
-                configurarActualizaciones()
+            1002 -> { // Notificaciones
+                if (grantResults.isNotEmpty() && grantResults[0] != PackageManager.PERMISSION_GRANTED) {
+                    Toast.makeText(this, "No se podrán mostrar notificaciones", Toast.LENGTH_SHORT).show()
+                }
             }
         }
     }
-
 
     override fun onDestroy() {
         super.onDestroy()
