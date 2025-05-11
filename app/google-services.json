@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "541389903303",
+    "project_id": "appmela-cd384",
+    "storage_bucket": "appmela-cd384.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:541389903303:android:dfc3c248300553fca335e2",
+        "android_client_info": {
+          "package_name": "com.example.taller3"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyByYxI-ANO2BJ3lNrf0akCLwd7rTH5Bjo4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

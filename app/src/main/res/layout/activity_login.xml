@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/loginScreen"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#E6ECF6">
+
+    <!-- Logo centrado -->
+    <ImageView
+        android:id="@+id/logoImage"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:layout_marginTop="50dp"
+        android:layout_centerHorizontal="true"
+        android:src="@drawable/logo"
+        android:contentDescription="Logo" />
+
+    <!-- Título -->
+    <TextView
+        android:id="@+id/titleLogin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Bienvenido de nuevo"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:textColor="#551969"
+        android:layout_below="@id/logoImage"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="16dp" />
+
+    <!-- Subtítulo -->
+    <TextView
+        android:id="@+id/subtitleLogin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Por favor inicia sesión con tus datos"
+        android:textSize="14sp"
+        android:textColor="#845484"
+        android:layout_below="@id/titleLogin"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="4dp" />
+
+    <!-- Caja de login -->
+    <RelativeLayout
+        android:id="@+id/loginBox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/subtitleLogin"
+        android:layout_marginTop="30dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginEnd="24dp"
+        android:background="@drawable/rounded_corners_lightpurple"
+        android:padding="24dp">
+
+        <!-- Campo de correo -->
+        <EditText
+            android:id="@+id/emailInput"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:hint="Correo electrónico"
+            android:inputType="textEmailAddress"
+            android:background="@drawable/edit_text_background"
+            android:padding="12dp"
+            android:textSize="14sp"
+            android:textColor="#000000"
+            android:textColorHint="#666666"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Campo de contraseña -->
+        <EditText
+            android:id="@+id/passwordInput"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_below="@id/emailInput"
+            android:hint="Contraseña"
+            android:inputType="textPassword"
+            android:background="@drawable/edit_text_background"
+            android:padding="12dp"
+            android:textSize="14sp"
+            android:textColor="#000000"
+            android:textColorHint="#666666"
+            android:layout_marginTop="8dp" />
+
+        <!-- Botón iniciar sesión -->
+        <Button
+            android:id="@+id/loginBtn"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_below="@id/passwordInput"
+            android:layout_marginTop="20dp"
+            android:text="Iniciar sesión"
+            android:textColor="#FFFFFF"
+            app:backgroundTint="#4AA6F0"
+            app:cornerRadius="8dp" />
+    </RelativeLayout>
+
+    <!-- Texto de registro -->
+    <TextView
+        android:id="@+id/registerPrompt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="¿No tienes cuenta?"
+        android:textSize="14sp"
+        android:textColor="#551969"
+        android:layout_below="@id/loginBox"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="24dp" />
+
+    <!-- Botón registrarse -->
+    <Button
+        android:id="@+id/registerBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Registrarse"
+        android:textColor="#FFFFFF"
+        app:backgroundTint="#F89BE5"
+        app:cornerRadius="50dp"
+        android:layout_below="@id/registerPrompt"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="8dp"
+        android:paddingStart="24dp"
+        android:paddingEnd="24dp" />
+
+</RelativeLayout>
