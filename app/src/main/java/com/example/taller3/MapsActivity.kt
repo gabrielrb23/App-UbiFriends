@@ -44,30 +44,17 @@ class MapsActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        solicitarPermisos()
+
         Configuration.getInstance().load(applicationContext, getSharedPreferences("osm_prefs", MODE_PRIVATE))
         binding = ActivityMapsBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
-        //Si tiene permiso, inicien las actualizaciones de ubicacion
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-            != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), 1001)
-        } else {
-            configurarActualizaciones()
-        }
-
         auth = FirebaseAuth.getInstance()
         myRef = FirebaseDatabase.getInstance().getReference("Users")
-
-        //Pida el permiso de notificaciones si no lo tiene
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
-                != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.POST_NOTIFICATIONS), 1002)
-            }
-        }
 
         //Crea el canal de notificaciones
         val channel = NotificationChannel(
@@ -233,24 +220,60 @@ class MapsActivity : AppCompatActivity() {
         map.invalidate()
     }
 
+    private fun solicitarPermisos() {
+        val permisosNecesarios = mutableListOf<String>()
+
+        // Verifica si falta el permiso de ubicación
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+            != PackageManager.PERMISSION_GRANTED) {
+            permisosNecesarios.add(Manifest.permission.ACCESS_FINE_LOCATION)
+        }
+
+        // Verifica si falta el permiso de notificaciones (solo si Android 13 o superior)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+            != PackageManager.PERMISSION_GRANTED) {
+            permisosNecesarios.add(Manifest.permission.POST_NOTIFICATIONS)
+        }
+
+        // Si hay permisos faltantes, pedirlos
+        if (permisosNecesarios.isNotEmpty()) {
+            ActivityCompat.requestPermissions(this, permisosNecesarios.toTypedArray(), 1000)
+        } else {
+            configurarActualizaciones()
+        }
+    }
+
+
     //Metodo que pide los permisos de notificacion y ubicacion
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        when (requestCode) {
-            1001 -> { // Ubicación
-                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    configurarActualizaciones()
-                } else {
-                    Toast.makeText(this, "Se necesita el permiso de ubicación para continuar", Toast.LENGTH_SHORT).show()
+
+        if (requestCode == 1000) {
+            var permisoUbicacionConcedido = false
+
+            permissions.forEachIndexed { index, permiso ->
+                if (permiso == Manifest.permission.ACCESS_FINE_LOCATION) {
+                    if (grantResults[index] == PackageManager.PERMISSION_GRANTED) {
+                        permisoUbicacionConcedido = true
+                    } else {
+                        Toast.makeText(this, "Se necesita el permiso de ubicación para continuar", Toast.LENGTH_SHORT).show()
+                    }
+                }
+
+                if (permiso == Manifest.permission.POST_NOTIFICATIONS) {
+                    if (grantResults[index] != PackageManager.PERMISSION_GRANTED) {
+                        Toast.makeText(this, "No se podrán mostrar notificaciones", Toast.LENGTH_SHORT).show()
+                    }
                 }
             }
-            1002 -> { // Notificaciones
-                if (grantResults.isNotEmpty() && grantResults[0] != PackageManager.PERMISSION_GRANTED) {
-                    Toast.makeText(this, "No se podrán mostrar notificaciones", Toast.LENGTH_SHORT).show()
-                }
+
+            if (permisoUbicacionConcedido) {
+                configurarActualizaciones()
             }
         }
     }
+
 
     override fun onDestroy() {
         super.onDestroy()
