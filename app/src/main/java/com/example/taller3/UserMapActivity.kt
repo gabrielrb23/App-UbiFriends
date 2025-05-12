@@ -7,13 +7,12 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
-import com.example.taller3.databinding.ActivityMapsBinding
+import com.example.taller3.databinding.ActivityUserMapBinding
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
 import android.Manifest
 import android.os.Looper
 import androidx.core.content.ContextCompat
-import com.example.taller3.databinding.ActivityUserMapBinding
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
@@ -24,12 +23,16 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import org.json.JSONObject
 import org.osmdroid.config.Configuration
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
+import kotlin.math.atan2
+import kotlin.math.cos
+import kotlin.math.pow
+import kotlin.math.sin
+import kotlin.math.sqrt
 
 class UserMapActivity : AppCompatActivity() {
 
@@ -180,6 +183,16 @@ class UserMapActivity : AppCompatActivity() {
         val punto2 = otherUserMarker?.position
 
         if (punto1 != null && punto2 != null) {
+            // Calcular la distancia entre los dos puntos
+            val distancia = calcularDistancia(punto1, punto2)
+
+            // Mostrar la distancia en un Toast
+            Toast.makeText(
+                this,
+                "Distancia: ${String.format("%.2f", distancia)} km",
+                Toast.LENGTH_SHORT
+            ).show()
+
             if (lineaEntreUsuarios == null) {
                 lineaEntreUsuarios = org.osmdroid.views.overlay.Polyline().apply {
                     outlinePaint.color = android.graphics.Color.BLUE
@@ -210,10 +223,32 @@ class UserMapActivity : AppCompatActivity() {
         }
     }
 
+    // Metodo para calcular la distancia entre dos puntos usando la fórmula de Haversine
+    private fun calcularDistancia(punto1: GeoPoint, punto2: GeoPoint): Double {
+        val radioTierra = 6371.0 // Radio de la Tierra en kilómetros
+
+        // Convertir latitudes y longitudes de grados a radianes
+        val lat1Rad = Math.toRadians(punto1.latitude)
+        val lon1Rad = Math.toRadians(punto1.longitude)
+        val lat2Rad = Math.toRadians(punto2.latitude)
+        val lon2Rad = Math.toRadians(punto2.longitude)
+
+        // Diferencias de latitud y longitud
+        val dLat = lat2Rad - lat1Rad
+        val dLon = lon2Rad - lon1Rad
+
+        // Fórmula de Haversine
+        val a = sin(dLat / 2).pow(2.0) +
+                cos(lat1Rad) * cos(lat2Rad) *
+                sin(dLon / 2).pow(2.0)
+        val c = 2 * atan2(sqrt(a), sqrt(1 - a))
+
+        // Distancia en kilómetros
+        return radioTierra * c
+    }
 
     override fun onDestroy() {
         super.onDestroy()
         locationCallback?.let { fusedLocationClient.removeLocationUpdates(it) }
     }
-
 }

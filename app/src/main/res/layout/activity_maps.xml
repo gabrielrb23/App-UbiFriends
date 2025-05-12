@@ -1,66 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    android:layout_height="match_parent">
 
-    <!-- Switch de estado -->
-    <androidx.cardview.widget.CardView
-        android:layout_width="wrap_content"
-        android:layout_height="55dp"
-        android:layout_gravity="top|end"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="80dp"
-        app:cardCornerRadius="12dp"
-        app:cardBackgroundColor="#F89BE5"
-        app:cardElevation="6dp">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="center"
-            android:orientation="horizontal">
-
-            <com.google.android.material.switchmaterial.SwitchMaterial
-                android:id="@+id/statusBtn"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Disponible   "
-                android:textColor="@android:color/black"
-                android:padding="12dp"/>
-        </LinearLayout>
-    </androidx.cardview.widget.CardView>
-
+    <!-- Toolbar para asegurar que tenemos una barra de acción -->
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorPrimary"
+        android:elevation="4dp"
+        android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
 
     <!-- Mapa -->
-
     <org.osmdroid.views.MapView
         android:id="@+id/osmMap"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
-
-    <!-- Boton de usuarios -->
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/usersBtn"
-        android:layout_width="wrap_content"
-        android:layout_margin="16dp"
-        android:layout_height="wrap_content"
-        android:layout_gravity="end|top"
-        android:src="@drawable/ic_users"
-        app:backgroundTint="#F89BE5"
-        app:elevation="4dp"
-        app:maxImageSize="28dp"/>
-
-    <!-- Boton de cerrar sesion -->
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/logoutBtn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_margin="16dp"
-        android:src="@drawable/ic_logout"
-        app:backgroundTint="#F89BE5"
-        app:elevation="4dp"
-        app:maxImageSize="28dp"/>
+        android:layout_height="match_parent"
+        android:layout_marginTop="?attr/actionBarSize" />
 
 </FrameLayout>
